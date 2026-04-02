@@ -1,0 +1,14 @@
+---
+- name: Bitwarden Vault sperren (Lock)
+  ansible.builtin.command: bw lock
+  changed_when: false
+  ignore_errors: true
+
+- name: Sicherheit - Logout aus Bitwarden
+  ansible.builtin.command: bw logout
+  changed_when: false
+  ignore_errors: true
+
+- name: Session-ID Fact aus dem Speicher löschen
+  ansible.builtin.set_fact:
+    bw_session: ""

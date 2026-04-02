@@ -1,0 +1,8 @@
+---
+# Diese Variablen müssen von außen (z.B. Semaphore) übergeben werden:
+# bw_client_id: ""
+# bw_client_secret: ""
+# bw_master_password: ""
+
+# Optional für selbstgehostete Instanzen:
+# bw_server_url: ""
