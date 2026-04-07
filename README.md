@@ -7,10 +7,10 @@ Diese Collection enthält die Rolle `bitwarden_auth` zur sicheren Authentifizier
 1. Die **Bitwarden CLI (`bw`)** muss auf dem Host/Runner installiert sein.
 2. Das offizielle Plugin `community.general.bitwarden` wird für reine Lesezugriffe benötigt (wird bei Installation dieser Collection automatisch als Abhängigkeit definiert).
 3. Folgende Variablen müssen (z.B. über das Semaphore Environment) als *Secret* bereitgestellt werden:
-   * `bw_client_id` (API Key Client ID)
-   * `bw_client_secret` (API Key Secret)
-   * `bw_master_password` (Das Master-Passwort zum Entsperren des Tresors)
-   * `bw_server_url` *(Optional, nur bei Self-Hosted/Vaultwarden)*
+   * `bitwarden_auth_client_id` (API Key Client ID)
+   * `bitwarden_auth_client_secret` (API Key Secret)
+   * `bitwarden_auth_master_password` (Das Master-Passwort zum Entsperren des Tresors)
+   * `bitwarden_auth_server_url` *(Optional, nur bei Self-Hosted/Vaultwarden)*
 
 ## Nutzung in Playbooks
 
@@ -42,7 +42,7 @@ Dieses Playbook zeigt den kompletten Workflow: Einloggen, ein bestehendes Passwo
         # ==========================================
         - name: Hole ein Passwort aus dem Vault
           ansible.builtin.debug:
-            msg: "Gefundenes Passwort: {{ lookup('community.general.bitwarden', 'Mein_Datenbank_Eintrag', field='password', bw_session=bw_session) }}"
+            msg: "Gefundenes Passwort: {{ lookup('community.general.bitwarden', 'Mein_Datenbank_Eintrag', field='password', bitwarden_auth_session=bitwarden_auth_session) }}"
           no_log: true 
 
         # ==========================================

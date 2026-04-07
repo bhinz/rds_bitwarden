@@ -11,4 +11,4 @@
 
 - name: Session-ID Fact aus dem Speicher löschen
   ansible.builtin.set_fact:
-    bw_session: ""
+    bitwarden_auth_session: ""

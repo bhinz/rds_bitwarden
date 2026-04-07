@@ -1,8 +1,8 @@
 ---
 # Diese Variablen müssen von außen (z.B. Semaphore) übergeben werden:
-# bw_client_id: ""
-# bw_client_secret: ""
-# bw_master_password: ""
+# bitwarden_auth_client_id: ""
+# bitwarden_auth_client_secret: ""
+# bitwarden_auth_master_password: ""
 
 # Optional für selbstgehostete Instanzen:
-# bw_server_url: ""
+# bitwarden_auth_server_url: ""
