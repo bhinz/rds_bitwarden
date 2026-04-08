@@ -54,11 +54,11 @@ Dieses Playbook zeigt den kompletten Workflow: Einloggen, ein bestehendes Passwo
             tasks_from: rotate_password.yml
           vars:
             # Die eindeutige UUID des Bitwarden-Eintrags
-            bw_item_id: "76be324c-abcd-1234-efgh-9876543210ab"
+            bitwarden_auth_item_id: "76be324c-abcd-1234-efgh-9876543210ab"
 
         - name: Das neue Passwort direkt auf dem Zielsystem anwenden
           ansible.builtin.debug:
-            msg: "Das frisch generierte Passwort lautet {{ bw_rotated_password }}. Nutze es jetzt für SQL/API..."
+            msg: "Das frisch generierte Passwort lautet {{ bitwarden_authrotated_password }}. Nutze es jetzt für SQL/API..."
           no_log: true
 
       # ==========================================
