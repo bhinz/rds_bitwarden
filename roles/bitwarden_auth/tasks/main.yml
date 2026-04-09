@@ -4,6 +4,11 @@
   changed_when: false
   when: bitwarden_auth_server_url is defined and bitwarden_auth_server_url != ""
 
+- name: Stelle sicher, dass der Vault vor dem Login gesperrt ist
+  ansible.builtin.command: bw lock
+  failed_when: false
+  changed_when: false
+
 - name: Headless Login via API Keys
   ansible.builtin.command: bw login --apikey
   environment:
@@ -11,17 +16,29 @@
     BW_CLIENTSECRET: "{{ bitwarden_auth_client_secret }}"
   register: bitwarden_auth_login
   changed_when: false
-  failed_when: 
-    - bitwarden_auth_login.rc != 0 
+  failed_when:
+    - bitwarden_auth_login.rc != 0
     - "'already logged in' not in bitwarden_auth_login.stderr and 'already logged in' not in bitwarden_auth_login.stdout"
 
 - name: Vault entsperren und Session-ID generieren
-  ansible.builtin.command: bw unlock --passwordenv BW_PASSWORD --raw
+  ansible.builtin.shell: bw unlock --passwordenv BW_PASSWORD --raw 2> /tmp/bw_unlock_error.log
   environment:
     BW_PASSWORD: "{{ bitwarden_auth_master_password }}"
   register: bitwarden_auth_unlock
   no_log: true
   changed_when: false
+  ignore_errors: true
+
+- name: Fehler bei Unlock ausgeben
+  ansible.builtin.command: cat /tmp/bw_unlock_error.log
+  register: bw_unlock_err
+  when: bitwarden_auth_unlock.rc != 0
+  changed_when: false
+
+- name: Fail if unlock failed
+  ansible.builtin.fail:
+    msg: "bw unlock failed: {{ bw_unlock_err.stdout }}"
+  when: bitwarden_auth_unlock.rc != 0
 
 - name: Session-ID als Fact global verfügbar machen
   ansible.builtin.set_fact:
