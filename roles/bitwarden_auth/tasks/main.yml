@@ -31,13 +31,13 @@
 
 - name: Fehler bei Unlock ausgeben
   ansible.builtin.command: cat /tmp/bw_unlock_error.log
-  register: bw_unlock_err
+  register: bitwarden_auth_unlock_err
   when: bitwarden_auth_unlock.rc != 0
   changed_when: false
 
 - name: Fail if unlock failed
   ansible.builtin.fail:
-    msg: "bw unlock failed: {{ bw_unlock_err.stdout }}"
+    msg: "bw unlock failed: {{ bitwarden_auth_unlock_err.stdout }}"
   when: bitwarden_auth_unlock.rc != 0
 
 - name: Session-ID als Fact global verfügbar machen
