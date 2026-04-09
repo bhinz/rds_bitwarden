@@ -1,11 +1,22 @@
 ---
 - name: Bitwarden Vault sperren (Lock)
   ansible.builtin.command: bw lock
+  environment:
+    BITWARDENCLI_APPDATA_DIR: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
   changed_when: false
   ignore_errors: true
 
 - name: Sicherheit - Logout aus Bitwarden
   ansible.builtin.command: bw logout
+  environment:
+    BITWARDENCLI_APPDATA_DIR: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
+  changed_when: false
+  ignore_errors: true
+
+- name: Isoliertes Verzeichnis für Bitwarden CLI entfernen
+  ansible.builtin.file:
+    path: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
+    state: absent
   changed_when: false
   ignore_errors: true
 
