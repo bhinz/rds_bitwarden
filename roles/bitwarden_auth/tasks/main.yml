@@ -38,3 +38,11 @@
   ansible.builtin.set_fact:
     bitwarden_auth_session: "{{ bitwarden_auth_unlock.stdout }}"
   no_log: true
+
+- name: Vault synchronisieren
+  ansible.builtin.command: bw sync
+  environment:
+    BW_SESSION: "{{ bitwarden_auth_session }}"
+    BITWARDENCLI_APPDATA_DIR: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
+  changed_when: false
+  no_log: true

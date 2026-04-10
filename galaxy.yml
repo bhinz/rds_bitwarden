@@ -1,6 +1,6 @@
 namespace: rds
 name: rds_bitwarden
-version: 1.0.5
+version: 1.0.6
 readme: README.md
 authors:
   - Björn Hinz <bjoern.hinz@rohwerder.net>
