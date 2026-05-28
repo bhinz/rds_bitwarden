@@ -23,49 +23,63 @@ Dieses Playbook zeigt den kompletten Workflow: Einloggen, ein bestehendes Passwo
 
 ```yaml
 ---
-- name: Bitwarden Workflow Example
+- name: Passwörter rotieren und mit Bitwarden synchronisieren
   hosts: localhost
   gather_facts: false
+  strategy: linear
+  vars:
+    # Einheitlicher Cache-Pfad für den zentralen Login
+    bitwarden_auth_appdata_dir: /tmp/bw_ansible_shared_rotate_pw
 
   tasks:
-    - name: Führe sensible Bitwarden-Operationen sicher aus
+    - name: Gesamter Ablauf mit sicherem zentralen Logout
       block:
         # ==========================================
-        # 1. Login & Unlock
+        # 1. Zentraler Login & Unlock (Einmalig)
         # ==========================================
-        - name: Bitwarden Vault entsperren (Session-ID generieren)
-          ansible.builtin.include_role:
-            name: rds.rds_bitwarden.bitwarden_auth
+        - name: Zentraler Bitwarden Login
+          run_once: true
+          delegate_to: localhost
+          block:
+            - name: Bitwarden Vault entsperren (Session-ID generieren)
+              ansible.builtin.include_role:
+                name: rds.rds_bitwarden.bitwarden_auth
+
+        - name: Session-ID an alle Hosts verteilen
+          ansible.builtin.set_fact:
+            global_bw_session: "{{ hostvars[ansible_play_hosts[0]]['bitwarden_auth_session'] }}"
 
         # ==========================================
-        # 2. Bestehendes Secret auslesen (Read-Only)
+        # 2. Passwort in Bitwarden rotieren (Throttled)
         # ==========================================
-        - name: Hole ein Passwort aus dem Vault
-          ansible.builtin.debug:
-            msg: "Gefundenes Passwort: {{ lookup('community.general.bitwarden', 'Mein_Datenbank_Eintrag', field='password', bitwarden_auth_session=bitwarden_auth_session) }}"
-          no_log: true 
-
-        # ==========================================
-        # 3. Passwort rotieren (Neu generieren & Speichern)
-        # ==========================================
-        - name: Rotiere Passwort für einen spezifischen Eintrag
-          ansible.builtin.include_role:
-            name: rds.rds_bitwarden.bitwarden_auth
-            tasks_from: rotate_password.yml
-          vars:
-            # Die eindeutige UUID des Bitwarden-Eintrags
-            bitwarden_auth_item_id: "76be324c-abcd-1234-efgh-9876543210ab"
+        - name: "Isolierter Block für Bitwarden Passwort-Rotation"
+          # Verhindert Dateisperren (File Locks) auf dem gemeinsamen bw_ansible_shared Cache
+          throttle: 1
+          block:
+            - name: Rotiere Passwort in Bitwarden für diesen Host
+              ansible.builtin.include_role:
+                name: rds.rds_bitwarden.bitwarden_auth
+                tasks_from: rotate_password.yml
+                apply:
+                  delegate_to: localhost
+              vars:
+                bitwarden_auth_item_id: "{{ bw_item_id }}"
+                bitwarden_auth_session: "{{ global_bw_session }}"
 
         - name: Das neue Passwort direkt auf dem Zielsystem anwenden
-          ansible.builtin.debug:
-            msg: "Das frisch generierte Passwort lautet {{ bitwarden_authrotated_password }}. Nutze es jetzt für SQL/API..."
-          no_log: true
+            ansible.builtin.debug:
+              msg: "Das frisch generierte Passwort lautet {{ bitwarden_authrotated_password }}."
+            no_log: true
 
-      # ==========================================
-      # 4. Garantiertes Logout (Lock & Session zerstören)
-      # ==========================================
-      always:
-        - name: Bitwarden Vault wieder sperren und ausloggen
-          ansible.builtin.include_role:
-            name: rds.rds_bitwarden.bitwarden_auth
-            tasks_from: logout
+    # ==========================================
+    # 3. Garantiertes Logout (Einmalig)
+    # ==========================================
+    always:
+      - name: Zentraler Bitwarden Logout
+        run_once: true
+        delegate_to: localhost
+        block:
+          - name: Bitwarden Vault wieder sperren und ausloggen
+            ansible.builtin.include_role:
+              name: rds.rds_bitwarden.bitwarden_auth
+              tasks_from: logout
