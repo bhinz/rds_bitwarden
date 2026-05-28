@@ -1,9 +1,8 @@
 namespace: rds
 name: rds_bitwarden
-version: 1.0.7
+version: 1.0.8
 readme: README.md
 authors:
   - Björn Hinz <bjoern.hinz@rohwerder.net>
 description: "Bitwarden Automatisierung für CI/CD"
-dependencies:
-  "community.general": ">=6.0.0"
+dependencies: {}

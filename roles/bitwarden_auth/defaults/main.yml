@@ -1,11 +1,8 @@
 ---
-# Diese Variablen müssen von außen (z.B. Semaphore) übergeben werden:
+# Diese Variablen müssen von außen übergeben werden:
 # bitwarden_auth_client_id: ""
 # bitwarden_auth_client_secret: ""
 # bitwarden_auth_master_password: ""
 
 # Optional für selbstgehostete Instanzen:
 # bitwarden_auth_server_url: ""
-
-# Optionales Verhalten für rotate_password.yml:
-bitwarden_auth_auto_logout_after_rotation: true

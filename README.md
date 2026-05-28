@@ -5,8 +5,7 @@ Diese Collection enthält die Rolle `bitwarden_auth` zur sicheren Authentifizier
 ## Voraussetzungen
 
 1. Die **Bitwarden CLI (`bw`)** muss auf dem Host/Runner installiert sein.
-2. Das offizielle Plugin `community.general.bitwarden` wird für reine Lesezugriffe benötigt (wird bei Installation dieser Collection automatisch als Abhängigkeit definiert).
-3. Folgende Variablen müssen (z.B. über das Semaphore Environment) als *Secret* bereitgestellt werden:
+2. Folgende Variablen müssen bereitgestellt werden:
    * `bitwarden_auth_client_id` (API Key Client ID)
    * `bitwarden_auth_client_secret` (API Key Secret)
    * `bitwarden_auth_master_password` (Das Master-Passwort zum Entsperren des Tresors)
