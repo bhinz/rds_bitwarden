@@ -1,19 +1,19 @@
 ---
-- name: Optional - Bitwarden Server URL konfigurieren
+- name: Optional - Configure Bitwarden server URL
   ansible.builtin.command: "bw config server {{ bitwarden_auth_server_url }}"
   environment:
     BITWARDENCLI_APPDATA_DIR: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
   changed_when: false
   when: bitwarden_auth_server_url is defined and bitwarden_auth_server_url != ""
 
-- name: Stelle sicher, dass der Vault vor dem Login gesperrt ist
+- name: Ensure the vault is locked before login
   ansible.builtin.command: bw lock
   environment:
     BITWARDENCLI_APPDATA_DIR: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
   failed_when: false
   changed_when: false
 
-- name: Headless Login via API Keys
+- name: Headless login via API keys
   ansible.builtin.command: bw login --apikey
   environment:
     BW_CLIENTID: "{{ bitwarden_auth_client_id }}"
@@ -25,7 +25,7 @@
     - bitwarden_auth_login.rc != 0
     - "'already logged in' not in bitwarden_auth_login.stderr and 'already logged in' not in bitwarden_auth_login.stdout"
 
-- name: Vault entsperren und Session-ID generieren
+- name: Unlock vault and generate session ID
   ansible.builtin.command: bw unlock --passwordenv BW_PASSWORD --raw
   environment:
     BW_PASSWORD: "{{ bitwarden_auth_master_password }}"
@@ -34,12 +34,12 @@
   no_log: true
   changed_when: false
 
-- name: Session-ID als Fact global verfügbar machen
+- name: Store session ID as a globally available fact
   ansible.builtin.set_fact:
     bitwarden_auth_session: "{{ bitwarden_auth_unlock.stdout }}"
   no_log: true
 
-- name: Vault synchronisieren
+- name: Synchronize vault
   ansible.builtin.command: bw sync
   environment:
     BW_SESSION: "{{ bitwarden_auth_session }}"

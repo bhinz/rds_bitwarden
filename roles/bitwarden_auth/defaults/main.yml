@@ -1,8 +1,8 @@
 ---
-# Diese Variablen müssen von außen übergeben werden:
+# These variables must be provided externally:
 # bitwarden_auth_client_id: ""
 # bitwarden_auth_client_secret: ""
 # bitwarden_auth_master_password: ""
 
-# Optional für selbstgehostete Instanzen:
+# Optional for self-hosted instances:
 # bitwarden_auth_server_url: ""

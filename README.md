@@ -1,86 +1,86 @@
 # Ansible Collection: rds.rds_bitwarden
 
-Diese Collection enthält die Rolle `bitwarden_auth` zur sicheren Authentifizierung gegen Bitwarden und zur Verwaltung von Secrets in automatisierten Umgebungen (z. B. Ansible Semaphore oder GitLab CI).
+This collection contains the `bitwarden_auth` role for secure authentication against Bitwarden and secret management in automated environments (for example Ansible Semaphore or GitLab CI).
 
-## Voraussetzungen
+## Requirements
 
-1. Die **Bitwarden CLI (`bw`)** muss auf dem Host/Runner installiert sein.
-2. Folgende Variablen müssen bereitgestellt werden:
+1. The **Bitwarden CLI (`bw`)** must be installed on the host/runner.
+2. The following variables must be provided:
    * `bitwarden_auth_client_id` (API Key Client ID)
    * `bitwarden_auth_client_secret` (API Key Secret)
-   * `bitwarden_auth_master_password` (Das Master-Passwort zum Entsperren des Tresors)
-   * `bitwarden_auth_server_url` *(Optional, nur bei Self-Hosted/Vaultwarden)*
+   * `bitwarden_auth_master_password` (The master password used to unlock the vault)
+   * `bitwarden_auth_server_url` *(Optional, only for self-hosted/Vaultwarden)*
 
-## Nutzung in Playbooks
+## Usage in Playbooks
 
-Der vollqualifizierte Name (FQCN) der Rolle lautet `rds.rds_bitwarden.bitwarden_auth`.
-Die Datei `tasks/rotate_password.yml` kann jetzt direkt verwendet werden:
+The fully qualified role name (FQCN) is `rds.rds_bitwarden.bitwarden_auth`.
+The `tasks/rotate_password.yml` file can be used directly:
 
-* Mit bestehender Session (`bitwarden_auth_session`) nutzt sie diese Session.
-* Ohne Session führt sie Login/Unlock/Synchronisierung automatisch aus.
-* Wenn sie die Session selbst erzeugt hat, wird danach automatisch ausgeloggt.
+* With an existing session (`bitwarden_auth_session`), it uses that session.
+* Without a session, it automatically performs login/unlock/synchronization.
+* If it created the session itself, it will automatically log out afterwards.
 
-### Einfaches Beispiel (nur rotate_password)
+### Simple example (rotate_password only)
 
-Dieses Beispiel reicht für die meisten Fälle aus.
+This example is sufficient for most use cases.
 
 ```yaml
 ---
-- name: Passwort in Bitwarden rotieren
+- name: Rotate password in Bitwarden
   hosts: localhost
   gather_facts: false
 
   tasks:
-    - name: Passwort für einen Eintrag rotieren
+    - name: Rotate password for an item
       ansible.builtin.include_role:
         name: rds.rds_bitwarden.bitwarden_auth
         tasks_from: rotate_password.yml
       vars:
         bitwarden_auth_item_id: "00000000-0000-0000-0000-000000000000"
 
-    - name: Rotiertes Passwort weiterverwenden
+    - name: Reuse rotated password
       ansible.builtin.debug:
-        msg: "Neues Passwort: {{ bitwarden_auth_rotated_password }}"
+        msg: "New password: {{ bitwarden_auth_rotated_password }}"
       no_log: true
 ```
 
-### Erweiterte Nutzung (zentrale Session für viele Hosts)
+### Advanced usage (central session for many hosts)
 
-Für sehr viele Hosts kann weiterhin ein zentraler Login mit geteilter Session sinnvoll sein, um API-Aufrufe zu reduzieren.
-Dann wird `bitwarden_auth_session` vorab gesetzt und an `rotate_password.yml` übergeben.
+For a large number of hosts, a central login with a shared session can still be useful to reduce API calls.
+In that case, set `bitwarden_auth_session` in advance and pass it to `rotate_password.yml`.
 
-### Komplexes Beispiel (zentrale Session-ID + throttle-Block)
+### Complex example (central session ID + throttle block)
 
-Dieses Muster eignet sich für viele Hosts mit parallelen Host-Operationen, aber serieller Passwortrotation gegen Bitwarden.
+This pattern is useful for many hosts with parallel host operations, but serialized password rotation against Bitwarden.
 
 ```yaml
 ---
-- name: Passwörter mit zentraler Bitwarden-Session rotieren
+- name: Rotate passwords with a central Bitwarden session
   hosts: firewalls
   gather_facts: false
   strategy: linear
   vars:
-    # Einheitlicher Cache-Pfad für den zentralen Login
+    # Shared cache path for central login
     bitwarden_auth_appdata_dir: /tmp/bw_ansible_shared_rotate_pw
 
   tasks:
-    - name: Gesamter Ablauf mit zentralem Login/Logout
+    - name: Complete workflow with central login/logout
       block:
-        - name: Zentraler Bitwarden Login
+        - name: Central Bitwarden login
           run_once: true
           delegate_to: localhost
           ansible.builtin.include_role:
             name: rds.rds_bitwarden.bitwarden_auth
 
-        - name: Session-ID an alle Hosts verteilen
+        - name: Distribute session ID to all hosts
           ansible.builtin.set_fact:
             global_bw_session: "{{ hostvars[ansible_play_hosts[0]]['bitwarden_auth_session'] }}"
 
-        - name: Passwortrotation pro Host (throttle)
+        - name: Per-host password rotation (throttle)
           when: bw_item_id is defined and bw_item_id != ""
           throttle: 1
           block:
-            - name: Passwort in Bitwarden rotieren
+            - name: Rotate password in Bitwarden
               ansible.builtin.include_role:
                 name: rds.rds_bitwarden.bitwarden_auth
                 tasks_from: rotate_password.yml
@@ -90,14 +90,14 @@ Dieses Muster eignet sich für viele Hosts mit parallelen Host-Operationen, aber
                 bitwarden_auth_item_id: "{{ bw_item_id }}"
                 bitwarden_auth_session: "{{ global_bw_session }}"
 
-        - name: Rotiertes Passwort auf dem Host weiterverwenden
+        - name: Reuse rotated password on the host
           when: bw_item_id is defined and bw_item_id != ""
           ansible.builtin.debug:
-            msg: "Rotiertes Passwort für {{ inventory_hostname }} liegt vor."
+            msg: "Rotated password for {{ inventory_hostname }} is available."
           no_log: true
 
       always:
-        - name: Zentraler Bitwarden Logout
+        - name: Central Bitwarden logout
           run_once: true
           delegate_to: localhost
           ansible.builtin.include_role:
@@ -105,8 +105,8 @@ Dieses Muster eignet sich für viele Hosts mit parallelen Host-Operationen, aber
             tasks_from: logout.yml
 ```
 
-### Wichtige Variablen
+### Important variables
 
-* Pflicht für `rotate_password.yml`: `bitwarden_auth_item_id`
-* Rückgabewert: `bitwarden_auth_rotated_password`
-* Im komplexen Beispiel pro Host: `bw_item_id`
+* Required for `rotate_password.yml`: `bitwarden_auth_item_id`
+* Return value: `bitwarden_auth_rotated_password`
+* Per-host in the complex example: `bw_item_id`

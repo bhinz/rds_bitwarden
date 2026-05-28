@@ -1,25 +1,25 @@
 ---
-- name: Bitwarden Vault sperren (Lock)
+- name: Lock Bitwarden vault
   ansible.builtin.command: bw lock
   environment:
     BITWARDENCLI_APPDATA_DIR: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
   changed_when: false
   ignore_errors: true
 
-- name: Sicherheit - Logout aus Bitwarden
+- name: Security - Log out from Bitwarden
   ansible.builtin.command: bw logout
   environment:
     BITWARDENCLI_APPDATA_DIR: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
   changed_when: false
   ignore_errors: true
 
-- name: Isoliertes Verzeichnis für Bitwarden CLI entfernen
+- name: Remove isolated directory for Bitwarden CLI
   ansible.builtin.file:
     path: "{{ bitwarden_auth_appdata_dir | default('/tmp/bw_ansible_' ~ inventory_hostname) }}"
     state: absent
   changed_when: false
   ignore_errors: true
 
-- name: Session-ID Fact aus dem Speicher löschen
+- name: Clear session ID fact from memory
   ansible.builtin.set_fact:
     bitwarden_auth_session: ""
