@@ -5,4 +5,5 @@ readme: README.md
 authors:
   - Björn Hinz <bjoern@hinz.tv>
 description: "Bitwarden automation for CI/CD"
+repository: https://github.com/bhinz/rds_bitwarden
 dependencies: {}
