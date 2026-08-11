@@ -1,0 +1,31 @@
+name: Publish Collection to Ansible Galaxy
+
+# Die Action wird gestartet, sobald du in GitHub ein neues Release veröffentlichst
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible
+        run: pip install ansible-core
+
+      - name: Build and Publish Ansible Collection
+        env:
+          GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
+        run: |
+          # Baut die Collection anhand der galaxy.yml
+          ansible-galaxy collection build
+          
+          # Lädt das entstandene .tar.gz Archiv zu Galaxy hoch
+          ansible-galaxy collection publish *.tar.gz --api-key $GALAXY_API_KEY
