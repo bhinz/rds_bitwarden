@@ -1,4 +1,4 @@
-# Ansible Collection: rds.rds_bitwarden
+# Ansible Collection: bhinz.rds_bitwarden
 
 This collection contains the `bitwarden_auth` role for secure authentication against Bitwarden and secret management in automated environments (for example Ansible Semaphore or GitLab CI).
 
@@ -13,7 +13,7 @@ This collection contains the `bitwarden_auth` role for secure authentication aga
 
 ## Usage in Playbooks
 
-The fully qualified role name (FQCN) is `rds.rds_bitwarden.bitwarden_auth`.
+The fully qualified role name (FQCN) is `bhinz.rds_bitwarden.bitwarden_auth`.
 The `tasks/rotate_password.yml` file can be used directly:
 
 * With an existing session (`bitwarden_auth_session`), it uses that session.
@@ -33,7 +33,7 @@ This example is sufficient for most use cases.
   tasks:
     - name: Rotate password for an item
       ansible.builtin.include_role:
-        name: rds.rds_bitwarden.bitwarden_auth
+        name: bhinz.rds_bitwarden.bitwarden_auth
         tasks_from: rotate_password.yml
       vars:
         bitwarden_auth_item_id: "00000000-0000-0000-0000-000000000000"
@@ -70,7 +70,7 @@ This pattern is useful for many hosts with parallel host operations, but seriali
           run_once: true
           delegate_to: localhost
           ansible.builtin.include_role:
-            name: rds.rds_bitwarden.bitwarden_auth
+            name: bhinz.rds_bitwarden.bitwarden_auth
 
         - name: Distribute session ID to all hosts
           ansible.builtin.set_fact:
@@ -82,7 +82,7 @@ This pattern is useful for many hosts with parallel host operations, but seriali
           block:
             - name: Rotate password in Bitwarden
               ansible.builtin.include_role:
-                name: rds.rds_bitwarden.bitwarden_auth
+                name: bhinz.rds_bitwarden.bitwarden_auth
                 tasks_from: rotate_password.yml
                 apply:
                   delegate_to: localhost
@@ -101,7 +101,7 @@ This pattern is useful for many hosts with parallel host operations, but seriali
           run_once: true
           delegate_to: localhost
           ansible.builtin.include_role:
-            name: rds.rds_bitwarden.bitwarden_auth
+            name: bhinz.rds_bitwarden.bitwarden_auth
             tasks_from: logout.yml
 ```
 
