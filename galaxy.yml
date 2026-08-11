@@ -1,8 +1,8 @@
-namespace: rds
+namespace: bhinz
 name: rds_bitwarden
-version: 1.0.9
+version: 1.0.10
 readme: README.md
 authors:
-  - Björn Hinz <bjoern.hinz@rohwerder.net>
+  - Björn Hinz <bjoern@hinz.tv>
 description: "Bitwarden automation for CI/CD"
 dependencies: {}
