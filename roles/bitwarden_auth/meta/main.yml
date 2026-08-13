@@ -2,7 +2,7 @@ galaxy_info:
   author: Björn Hinz
   description: Ansible role for Bitwarden authentication
   license: MIT
-  min_ansible_version: 2.9
+  min_ansible_version: '>=2.13.9'
   platforms:
     - name: Ubuntu
       versions:

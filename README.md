@@ -2,6 +2,14 @@
 
 This collection contains the `bitwarden_auth` role for secure authentication against Bitwarden and secret management in automated environments (for example Ansible Semaphore or GitLab CI).
 
+## Installation
+
+The collection can be installed via ansible-galaxy:
+
+```bash
+ansible-galaxy collection install bhinz.rds_bitwarden
+```
+
 ## Requirements
 
 1. The **Bitwarden CLI (`bw`)** must be installed on the host/runner.
